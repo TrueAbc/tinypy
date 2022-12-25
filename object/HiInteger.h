@@ -11,20 +11,32 @@ class HiInteger : public HiObject{
 private:
     int _value;
 public:
-    HiInteger(int x){
-        _value = x;
-    };
+    HiInteger(int x);
     int value(){return _value;}
-
-    virtual void print() override;
-    virtual HiObject * add(HiObject *x) override;
-    virtual HiObject* greater(HiObject* x) override;
-    virtual HiObject* less(HiObject* x) override;
-    virtual HiObject* equal(HiObject* x) override;
-    virtual HiObject* not_equal(HiObject* x) override;
-    virtual HiObject* ge(HiObject* x) override;
-    virtual HiObject* le(HiObject* x) override;
 };
 
+class IntegerKlass : public Klass {
+private:
+    IntegerKlass(); // 私有构造方法, 单例模式
+    static IntegerKlass* instance;
+
+public:
+    static IntegerKlass* get_instance();
+
+    virtual void print(HiObject* obj);
+
+    virtual HiObject* add(HiObject *x, HiObject *y);
+    virtual HiObject* sub(HiObject *x, HiObject *y);
+    virtual HiObject* mul(HiObject *x, HiObject *y);
+    virtual HiObject* div(HiObject *x, HiObject *y);
+    virtual HiObject* mod(HiObject *x, HiObject *y);
+
+    virtual HiObject* greater(HiObject* x, HiObject *y);
+    virtual HiObject* less(HiObject* x, HiObject *y);
+    virtual HiObject* equal(HiObject* x, HiObject *y);
+    virtual HiObject* not_equal(HiObject* x, HiObject *y);
+    virtual HiObject* ge(HiObject* x, HiObject *y);
+    virtual HiObject* le(HiObject* x, HiObject *y);
+};
 
 #endif //TINYPY_HIINTEGER_H

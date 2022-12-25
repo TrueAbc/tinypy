@@ -5,20 +5,38 @@
 #ifndef TINYPY_HIOBJECT_H
 #define TINYPY_HIOBJECT_H
 
-#include "stdio.h"
+#include <cassert>
+#include <cstdio>
+#include "Klass.h"
+
+class HiString;
 
 // 对象系统的基类
 class HiObject {
-public:
-    virtual void print(){};
+private:
+    Klass* _klass;
 
-    virtual HiObject* add(HiObject *x){};
-    virtual HiObject* greater(HiObject* x){};
-    virtual HiObject* less(HiObject* x){};
-    virtual HiObject* equal(HiObject* x){};
-    virtual HiObject* not_equal(HiObject* x){};
-    virtual HiObject* ge(HiObject* x){};
-    virtual HiObject* le(HiObject* x){};
+public:
+    Klass* klass(){
+        assert(_klass != nullptr);
+        return _klass;
+    }
+    void set_klass(Klass* x){_klass = x;}
+
+    void print();
+
+    HiObject* add(HiObject *x);
+    HiObject* sub(HiObject* x);
+    HiObject* mul(HiObject *x);
+    HiObject* div(HiObject* x);
+    HiObject* mod(HiObject* x);
+
+    HiObject* greater(HiObject* x);
+    HiObject* less(HiObject* x);
+    HiObject* equal(HiObject* x);
+    HiObject* not_equal(HiObject* x);
+    HiObject* ge(HiObject* x);
+    HiObject* le(HiObject* x);
 };
 
 

@@ -7,6 +7,18 @@
 
 #include "HiObject.h"
 
+class StringKlass : public Klass {
+private:
+    StringKlass();
+    static StringKlass* instance;
+
+public:
+    static StringKlass* get_instance();
+
+    virtual HiObject* equal(HiObject* x, HiObject* y);
+    virtual void print(HiObject* obj);
+};
+
 class HiString : public HiObject{
 private:
     char* _value;
@@ -23,7 +35,6 @@ public:
         return _length;
     }
 
-    virtual HiObject* equal(HiObject* x) override;
 };
 
 

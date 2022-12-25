@@ -116,8 +116,9 @@ void Interpreter::run(CodeObject* code){
                 pc = b->_target;
                 break;
             case ByteCode::STORE_NAME:
-                v = POP();
-                _names.put(code->_names->get(op_arg), new HiInteger(((HiInteger*)v)->value()));
+                v = code->_names->get(op_arg);
+                w = POP();
+                _names.put(v, new HiInteger(((HiInteger*)w)->value()));
                 break;
             case ByteCode::LOAD_NAME:
                 w = code->_names->get(op_arg);
