@@ -13,13 +13,21 @@ FrameObject::FrameObject(FunctionObject *func, ObjList args) {
 
     _locals = new Map<HiObject*, HiObject*>();
     _globals = func->globals();
-    _fast_locals = nullptr; // 函数的参数
+
     _stack = new ArrayList<HiObject*>();
     _loop_stack = new ArrayList<Block*>();
+    _fast_locals = new ArrayList<HiObject*>(); // 函数的参数
+
+    if (func->_defaults) {
+        int dft_cnt = func->defaults()->size();
+        int argcnt = _codes->_argcount;
+        while (dft_cnt--){
+            _fast_locals->set(--argcnt, func->_defaults->get(dft_cnt));
+        }
+    }
 
     if (args) {
-        _fast_locals = new ArrayList<HiObject*>();
-        for (int i = 0; i < args->length(); ++i) {
+        for (int i = 0; i < args->size(); ++i) {
             _fast_locals->set(i, args->get(i));
         }
     }

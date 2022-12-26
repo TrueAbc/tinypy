@@ -168,6 +168,17 @@ void Interpreter::eval_frame(){
                 v = POP();
                 fo = new FunctionObject(v);
                 fo->set_globals(_frame->globals());
+                if (op_arg > 0) {
+                    args = new ArrayList<HiObject*>(op_arg);
+                    while (op_arg--){
+                        args->set(op_arg, POP());
+                    }
+                }
+                fo->set_default(args);
+                if (args != nullptr) {
+                    delete args;
+                    args = nullptr;
+                }
                 PUSH(fo);
                 break;
             case ByteCode::CALL_FUNCTION:
@@ -177,7 +188,8 @@ void Interpreter::eval_frame(){
                         args->set(op_arg, POP());
                     }
                 }
-                build_frame(POP(), args); // 弹出的对象已经是一个FunctionObject了
+                v = POP();
+                build_frame(v, args); // 弹出的对象已经是一个FunctionObject了
                 if (args != nullptr) {
                     delete args;
                     args = nullptr;
@@ -212,6 +224,7 @@ void Interpreter::build_frame(HiObject *callable, ObjList args) {
 }
 
 void Interpreter::run(CodeObject *code) {
+    printf("start running vm\n");
     _frame = new FrameObject(code);
     eval_frame();
     destroy_frame();

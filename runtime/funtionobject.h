@@ -26,6 +26,7 @@ class FunctionObject : public HiObject {
 private:
     CodeObject* _func_code;
     HiString* _func_name;
+    ObjList _defaults;
 
     unsigned int _flags;
     Map<HiObject*, HiObject*>* _globals;// 函数创建时候会绑定上下文的全局变量
@@ -36,6 +37,7 @@ public:
         _func_code = nullptr;
         _func_name = nullptr;
         _flags = 0;
+        _defaults = nullptr;
         set_klass(klass);
     }
 
@@ -44,6 +46,8 @@ public:
 
     Map<HiObject*, HiObject*>* globals(){return _globals;}
     void set_globals(Map<HiObject*, HiObject*>* x) {_globals = x;}
+    void set_default(ObjList defaults);
+    ObjList defaults(){return _defaults;}
 };
 
 
