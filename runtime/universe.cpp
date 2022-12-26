@@ -9,6 +9,7 @@ HiInteger* Universe::HiFalse = nullptr;
 HiObject* Universe::HiNone = nullptr;
 
 void Universe::genesis() {
+    // 打印出的内容也是 1
     HiTrue = new HiInteger(1);
     HiFalse = new HiInteger(0);
 

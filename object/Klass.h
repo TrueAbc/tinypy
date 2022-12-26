@@ -20,6 +20,7 @@ public:
     void set_name(HiString* x) {_name = x;}
     HiString* name() {return _name;}
 
+    // todo 对于Builtin变量, 可以修改一下打印函数
     virtual void print(HiObject* obj){};
 
     virtual HiObject* add(HiObject *x, HiObject *y){return 0;};

@@ -18,12 +18,11 @@ class Interpreter {
 public:
     FrameObject* _frame;
     HiObject* _ret_value;
+    Map<HiObject*, HiObject*>* _builtins;
 
     void run(CodeObject* code);
 
-    Interpreter(){
-        Universe::genesis();
-    }
+    Interpreter();
 
     ~Interpreter(){
         Universe::destroy();

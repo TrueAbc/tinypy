@@ -7,11 +7,24 @@
 #include "frameobject.h"
 #include "funtionobject.h"
 
-
-void Interpreter::eval_frame(){
+#define HI_TRUE       Universe::HiTrue
+#define HI_FALSE      Universe::HiFalse
+#define HI_NONE       Universe::HiNone
 #define PUSH(x) _frame->stack()->add((x))
 #define POP() _frame->stack()->pop()
 #define STACK_LEVEL() _frame->stack()->size()
+
+Interpreter::Interpreter() {
+    Universe::genesis();
+
+    _builtins = new Map<HiObject*, HiObject*>();
+
+    _builtins->put(new HiString("True"), HI_TRUE);
+    _builtins->put(new HiString("False"), HI_FALSE);
+    _builtins->put(new HiString("None"), HI_NONE);
+}
+
+void Interpreter::eval_frame(){
 
     while (_frame->has_more_codes()) {
 
@@ -80,14 +93,23 @@ void Interpreter::eval_frame(){
                     case ByteCode::LESS_EQUAL:
                         PUSH(v->le(w));
                         break;
-
+                    case ByteCode::IS:
+                        if (v == w)
+                            PUSH(HI_TRUE);
+                        else
+                            PUSH(HI_FALSE);
+                        break;
+                    case ByteCode::IS_NOT:
+                        if (v == w) PUSH(HI_FALSE);
+                        else PUSH(HI_TRUE);
+                        break;
                     default:
                         printf("Error: Unrecognized compare op: %d\n", op_arg);
                 }
                 break;
             case ByteCode::POP_JUMP_IF_FALSE:
                 v = POP();
-                if (v == Universe::HiFalse)
+                if (v == HI_FALSE)
                     _frame->set_pc(op_arg);
                 break;
             case ByteCode::JUMP_FORWARD:
@@ -125,16 +147,21 @@ void Interpreter::eval_frame(){
             case ByteCode::LOAD_NAME:
                 w = _frame->names()->get(op_arg);
                 v = _frame->locals()->get(w);
-                if (v != Universe::HiNone) {
+                if (v != HI_NONE) {
                     PUSH(v);
                     break;
                 }
                 v = _frame->globals()->get(w);
-                if (v != Universe::HiNone) {
+                if (v != HI_NONE) {
                     PUSH(v);
                     break;
                 }
-                PUSH(Universe::HiNone);
+                v = _builtins->get(w);
+                if (v != HI_NONE) {
+                    PUSH(v);
+                    break;
+                }
+                PUSH(HI_NONE);
                 break;
             case ByteCode::MAKE_FUNCTION:
                 v = POP();

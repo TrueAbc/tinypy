@@ -12,7 +12,13 @@ public:
         EQUAL, // !=
         NOT_EQUAL, // !=
         GREATER, // >
-        GREATER_EQUAL // >=
+        GREATER_EQUAL, // >=
+
+        IN,
+        NOT_IN,
+        IS, // is
+        IS_NOT, // is not
+        EXC_MATCH
     };
 
     static const unsigned char POP_TOP = 1;
