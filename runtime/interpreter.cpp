@@ -29,6 +29,9 @@ void Interpreter::eval_frame(){
         FunctionObject* fo;
 
         switch (op_code) {
+            case ByteCode::POP_TOP:
+                POP();
+                break;
             case ByteCode::LOAD_CONST:
                 PUSH(_frame->consts()->get(op_arg));
                 break;
@@ -122,15 +125,34 @@ void Interpreter::eval_frame(){
             case ByteCode::LOAD_NAME:
                 w = _frame->names()->get(op_arg);
                 v = _frame->locals()->get(w);
-                PUSH(v);
+                if (v != Universe::HiNone) {
+                    PUSH(v);
+                    break;
+                }
+                v = _frame->globals()->get(w);
+                if (v != Universe::HiNone) {
+                    PUSH(v);
+                    break;
+                }
+                PUSH(Universe::HiNone);
                 break;
             case ByteCode::MAKE_FUNCTION:
                 v = POP();
                 fo = new FunctionObject(v);
+                fo->set_globals(_frame->globals());
                 PUSH(fo);
                 break;
             case ByteCode::CALL_FUNCTION:
                 build_frame(POP()); // 弹出的对象已经是一个FunctionObject了
+                break;
+            case ByteCode::LOAD_GLOBAL:
+                v = _frame->names()->get(op_arg);
+                w = _frame->globals()->get(v);
+                PUSH(w);
+                break;
+            case ByteCode::STORE_GLOBAL:
+                v = _frame->names()->get(op_arg);
+                _frame->globals()->put(v, POP());
                 break;
             default:
                 printf("Error: Unrecognized byte code %d\n", op_code);

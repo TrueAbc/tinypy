@@ -28,6 +28,7 @@ private:
     HiString* _func_name;
 
     unsigned int _flags;
+    Map<HiObject*, HiObject*>* _globals;// 函数创建时候会绑定上下文的全局变量
 
 public:
     FunctionObject(HiObject* code_object);
@@ -40,6 +41,9 @@ public:
 
     HiString* func_name() {return _func_name;}
     int flags() {return _flags;}
+
+    Map<HiObject*, HiObject*>* globals(){return _globals;}
+    void set_globals(Map<HiObject*, HiObject*>* x) {_globals = x;}
 };
 
 
