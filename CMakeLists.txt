@@ -15,8 +15,8 @@ aux_source_directory (util libutil)
 
 add_executable(
         tinypy main.cpp
+        ${libutil}
         ${libobj}
         ${libruntime}
         ${libcode}
-        ${libutil}
 )

@@ -12,13 +12,11 @@
 #include "universe.h"
 #include "loopblock.h"
 
+class FrameObject;
+
 class Interpreter {
 public:
-    ArrayList<HiObject*>* _stack;
-    ArrayList<HiObject*>* _consts;
-    Map<HiObject*, HiObject*> _names; // 变量表
-    ArrayList<Block*>* _loop_stack; // while循环记录while块
-
+    FrameObject* _frame;
 
     void run(CodeObject* code);
 

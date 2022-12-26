@@ -9,7 +9,7 @@
 #include <cstdio>
 #include "Klass.h"
 
-class HiString;
+class Klass;
 
 // 对象系统的基类
 class HiObject {

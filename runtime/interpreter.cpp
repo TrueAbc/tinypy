@@ -4,30 +4,25 @@
 
 #include "interpreter.h"
 #include "universe.h"
+#include "frameobject.h"
 
 
 void Interpreter::run(CodeObject* code){
-#define PUSH(x) _stack->add((x))
-#define POP() _stack->pop()
-#define STACK_LEVEL() _stack->size()
+#define PUSH(x) _frame->stack()->add((x))
+#define POP() _frame->stack()->pop()
+#define STACK_LEVEL() _frame->stack()->size()
 
-    int pc = 0;
-    int code_length = code->_bytecodes->length();
+    _frame = new FrameObject(code);
 
-    _stack = new ArrayList<HiObject*>(code->_stack_size);
-    _consts = code->_consts;
-    _loop_stack = new ArrayList<Block*>();
+    while (_frame->has_more_codes()) {
 
-    while (pc < code_length) {
-
-        unsigned char op_code = code->_bytecodes->value()[pc++];
+        unsigned char op_code = _frame->get_op_code();
         bool has_argument = (op_code & 0xff) >= ByteCode::HAVE_ARGUMENT;
         int op_arg = -1;
 
         // 带参数的字节码参数有两个字节
         if(has_argument) {
-            int byte1 = (code->_bytecodes->value()[pc++] & 0xff);
-            op_arg = ((code->_bytecodes->value()[pc++] & 0xff) << 8) | byte1;
+            op_arg = _frame->get_op_arg();
         }
         HiInteger* lhs, *rhs;
         HiObject* v, *w, *u, *attr;
@@ -35,7 +30,7 @@ void Interpreter::run(CodeObject* code){
 
         switch (op_code) {
             case ByteCode::LOAD_CONST:
-                PUSH(_consts->get(op_arg));
+                PUSH(_frame->consts()->get(op_arg));
                 break;
             case ByteCode::PRINT_ITEM:
                 v = POP();
@@ -87,42 +82,43 @@ void Interpreter::run(CodeObject* code){
             case ByteCode::POP_JUMP_IF_FALSE:
                 v = POP();
                 if (v == Universe::HiFalse)
-                    pc = op_arg;
+                    _frame->set_pc(op_arg);
                 break;
             case ByteCode::JUMP_FORWARD:
-                pc += op_arg;
+                _frame->set_pc(op_arg + _frame->get_pc());
                 break;
             case ByteCode::JUMP_ABSOLUTE:
-                pc = op_arg;
+                _frame->set_pc(op_arg);
                 break;
             case ByteCode::SETUP_LOOP:
-                _loop_stack->add(new Block(
-                        op_code, pc + op_arg,
+                _frame->loop_stack()->add(
+                        new Block(
+                        op_code, _frame->get_pc() + op_arg,
                         STACK_LEVEL()
                         ));
                 break;
             case ByteCode::POP_BLOCK:
                 // 正常退出
-                b = _loop_stack->pop();
+                b = _frame->loop_stack()->pop();
                 while(STACK_LEVEL() > b->_level) {
                     POP();
                 }
                 break;
             case ByteCode::BREAK_LOOP:
-                b = _loop_stack->pop();
+                b = _frame->loop_stack()->pop();
                 while (STACK_LEVEL() > b->_level) {
                     POP();
                 }
-                pc = b->_target;
+                _frame->set_pc(b->_target);
                 break;
             case ByteCode::STORE_NAME:
-                v = code->_names->get(op_arg);
+                v = _frame->names()->get(op_arg);
                 w = POP();
-                _names.put(v, new HiInteger(((HiInteger*)w)->value()));
+                _frame->locals()->put(v, w);
                 break;
             case ByteCode::LOAD_NAME:
-                w = code->_names->get(op_arg);
-                v = _names.get(w);
+                w = _frame->names()->get(op_arg);
+                v = _frame->locals()->get(w);
                 PUSH(v);
                 break;
             default:
