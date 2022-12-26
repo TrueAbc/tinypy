@@ -5,14 +5,13 @@
 #include "interpreter.h"
 #include "universe.h"
 #include "frameobject.h"
+#include "funtionobject.h"
 
 
-void Interpreter::run(CodeObject* code){
+void Interpreter::eval_frame(){
 #define PUSH(x) _frame->stack()->add((x))
 #define POP() _frame->stack()->pop()
 #define STACK_LEVEL() _frame->stack()->size()
-
-    _frame = new FrameObject(code);
 
     while (_frame->has_more_codes()) {
 
@@ -27,6 +26,7 @@ void Interpreter::run(CodeObject* code){
         HiInteger* lhs, *rhs;
         HiObject* v, *w, *u, *attr;
         Block* b;
+        FunctionObject* fo;
 
         switch (op_code) {
             case ByteCode::LOAD_CONST:
@@ -45,7 +45,10 @@ void Interpreter::run(CodeObject* code){
                 PUSH(w->add(v));
                 break;
             case ByteCode::RETURN_VALUE:
-                POP();
+                _ret_value = POP();
+                if (_frame->is_first_frame())
+                    return;
+                leave_frame();
                 break;
             case ByteCode::COMPARE_OP:
                 w = POP();
@@ -121,8 +124,40 @@ void Interpreter::run(CodeObject* code){
                 v = _frame->locals()->get(w);
                 PUSH(v);
                 break;
+            case ByteCode::MAKE_FUNCTION:
+                v = POP();
+                fo = new FunctionObject(v);
+                PUSH(fo);
+                break;
+            case ByteCode::CALL_FUNCTION:
+                build_frame(POP()); // 弹出的对象已经是一个FunctionObject了
+                break;
             default:
                 printf("Error: Unrecognized byte code %d\n", op_code);
         }
     }
+}
+
+void Interpreter::build_frame(HiObject *callable) {
+    FrameObject* frame = new FrameObject((FunctionObject*) callable);
+    frame->set_sender(_frame);
+    _frame = frame;
+}
+
+void Interpreter::run(CodeObject *code) {
+    _frame = new FrameObject(code);
+    eval_frame();
+    destroy_frame();
+}
+
+void Interpreter::leave_frame() {
+    destroy_frame();
+    PUSH(_ret_value);
+}
+
+void Interpreter::destroy_frame() {
+    FrameObject* temp = _frame;
+    _frame = _frame->sender();
+
+    delete temp;
 }

@@ -42,5 +42,7 @@ public:
 
     static const unsigned char SETUP_LOOP = 120; /* Target address (relative) */
 
+    static const unsigned char CALL_FUNCTION = 131;
+    static const unsigned char MAKE_FUNCTION = 132;
 };
 #endif //TINYPY_BYTECODE_H

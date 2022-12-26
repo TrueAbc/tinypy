@@ -17,6 +17,7 @@ class FrameObject;
 class Interpreter {
 public:
     FrameObject* _frame;
+    HiObject* _ret_value;
 
     void run(CodeObject* code);
 
@@ -27,6 +28,11 @@ public:
     ~Interpreter(){
         Universe::destroy();
     }
+
+    void build_frame(HiObject* callable);
+    void eval_frame();
+    void leave_frame();
+    void destroy_frame();
 };
 
 

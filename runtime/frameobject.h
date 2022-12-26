@@ -9,11 +9,13 @@
 #include "loopblock.h"
 #include "util/map.h"
 
+class FunctionObject;
 // 函数执行期间的活动记录
 class FrameObject {
 public:
     FrameObject(CodeObject* codes);
-    ~FrameObject();
+    FrameObject(FunctionObject* functionObject);
+    ~FrameObject(){};
 
     ArrayList<HiObject*>* _stack;
     ArrayList<Block*>* _loop_stack;
@@ -25,8 +27,13 @@ public:
 
     CodeObject* _codes;
     int _pc;
+    FrameObject* _sender; // 函数的调用链
 
 public:
+
+    void set_sender(FrameObject* x) {_sender = x;}
+    FrameObject* sender(){return _sender;}
+
     void set_pc(int x){_pc = x;}
     int get_pc(){return _pc;}
 
@@ -39,6 +46,7 @@ public:
     bool has_more_codes();
     unsigned char get_op_code();
     int get_op_arg();
+    bool is_first_frame() {return _sender == nullptr;}
 };
 
 
