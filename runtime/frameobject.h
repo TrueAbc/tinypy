@@ -14,7 +14,7 @@ class FunctionObject;
 class FrameObject {
 public:
     FrameObject(CodeObject* codes);
-    FrameObject(FunctionObject* functionObject);
+    FrameObject(FunctionObject* functionObject, ObjList args);
     ~FrameObject(){};
 
     ArrayList<HiObject*>* _stack;
@@ -25,6 +25,7 @@ public:
 
     Map<HiObject*, HiObject*>* _locals;
     Map<HiObject*, HiObject*>* _globals;
+    ObjList _fast_locals;
 
     CodeObject* _codes;
     int _pc;
@@ -34,6 +35,8 @@ public:
 
     void set_sender(FrameObject* x) {_sender = x;}
     FrameObject* sender(){return _sender;}
+
+    ObjList fast_locals(){return _fast_locals;}
 
     void set_pc(int x){_pc = x;}
     int get_pc(){return _pc;}

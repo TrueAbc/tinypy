@@ -29,5 +29,6 @@ public:
     int length();
 };
 
-
+class HiObject;
+typedef ArrayList<HiObject*>* ObjList;
 #endif //TINYPY_ARRAYLIST_H

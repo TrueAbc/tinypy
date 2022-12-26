@@ -40,6 +40,7 @@ void Interpreter::eval_frame(){
         HiObject* v, *w, *u, *attr;
         Block* b;
         FunctionObject* fo;
+        ObjList args;
 
         switch (op_code) {
             case ByteCode::POP_TOP:
@@ -170,7 +171,17 @@ void Interpreter::eval_frame(){
                 PUSH(fo);
                 break;
             case ByteCode::CALL_FUNCTION:
-                build_frame(POP()); // 弹出的对象已经是一个FunctionObject了
+                if (op_arg > 0) {
+                    args = new ArrayList<HiObject*>(op_arg);
+                    while (op_arg--) {
+                        args->set(op_arg, POP());
+                    }
+                }
+                build_frame(POP(), args); // 弹出的对象已经是一个FunctionObject了
+                if (args != nullptr) {
+                    delete args;
+                    args = nullptr;
+                }
                 break;
             case ByteCode::LOAD_GLOBAL:
                 v = _frame->names()->get(op_arg);
@@ -181,14 +192,21 @@ void Interpreter::eval_frame(){
                 v = _frame->names()->get(op_arg);
                 _frame->globals()->put(v, POP());
                 break;
+            case ByteCode::LOAD_FAST:
+                PUSH(_frame->fast_locals()->get(op_arg));
+                break;
+            case ByteCode::STORE_FAST:
+                v = POP();
+                _frame->_fast_locals->set(op_arg, v);
+                break;
             default:
                 printf("Error: Unrecognized byte code %d\n", op_code);
         }
     }
 }
 
-void Interpreter::build_frame(HiObject *callable) {
-    FrameObject* frame = new FrameObject((FunctionObject*) callable);
+void Interpreter::build_frame(HiObject *callable, ObjList args) {
+    FrameObject* frame = new FrameObject((FunctionObject*) callable, args);
     frame->set_sender(_frame);
     _frame = frame;
 }

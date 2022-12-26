@@ -28,7 +28,7 @@ public:
         Universe::destroy();
     }
 
-    void build_frame(HiObject* callable);
+    void build_frame(HiObject* callable, ObjList args);
     void eval_frame();
     void leave_frame();
     void destroy_frame();
